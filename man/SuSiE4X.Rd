@@ -13,7 +13,7 @@ SuSiE4X(
   crossprodX = NULL,
   Lmain = 5,
   Linteraction = 5,
-  max.iter = 10,
+  max.iter = 15,
   max.eps = 1e-05,
   min.iter = 3,
   susie.iter = 300,

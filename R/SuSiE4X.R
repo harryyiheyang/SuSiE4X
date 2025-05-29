@@ -45,7 +45,7 @@
 SuSiE4X <- function(X, Z, y, strong = T,
                     n_threads = 1, crossprodX = NULL,
                     Lmain = 5, Linteraction = 5,
-                    max.iter = 10, max.eps = 1e-5, min.iter = 3,
+                    max.iter = 15, max.eps = 1e-5, min.iter = 3,
                     susie.iter = 300, verbose = TRUE,...) {
 
 if (is.null(colnames(X))){
