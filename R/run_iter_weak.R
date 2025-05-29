@@ -80,7 +80,6 @@ plot(g,
      xlab = "Iteration",
      ylab = "Max Parameter Change",
      main = "Convergence Trace of SuSiE4X (Max |Δ| in alpha and beta)")
-}
 
 for (i in seq_along(g)) {
 text(x = i,
@@ -90,7 +89,7 @@ text(x = i,
      cex = 0.7,      #
      col = "red")
 }
-
+}
 list(iter=iter,
      error=g,
      fitX = fitX,
