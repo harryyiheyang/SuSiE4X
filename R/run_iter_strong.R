@@ -40,7 +40,7 @@ etaX <- etaX - mean(etaX)
 rW <- y- etaZ - etaX
 XCS <- matrixMultiply(X, t(as.matrix(fitX$alpha)))
 colnames(XCS) <- paste0("Main_CS", seq_len(ncol(XCS)))
-cs <- get_active_indices(fitX)
+cs <- sort(get_active_indices(fitX))
 if(length(cs)==0){
   stop("No credible set of marginal effects detected. SuSiE4X stops.")
 }
