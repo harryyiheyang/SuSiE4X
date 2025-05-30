@@ -54,9 +54,9 @@ return(active_idx)
 ###############################################################################
 Identifying_MainEffect=function(fit,nam){
 summ=summary(fit)$vars
-g=max(summ$cs)
+g=unique(summ$cs[which(summ$cs>0)])
 S=list()
-for(i in 1:g){
+for(i in g){
 indi=which(summ$cs==i)
 a=summ$variable[indi]
 b=data.frame(Index=a,Variable=nam[summ$variable[indi]],CS=paste0("Main_CS",i))
@@ -68,9 +68,9 @@ return(do.call(rbind,S))
 Identifying_IntEffect=function(fitW,namW){
 summ=summary(fitW)$vars
 if(length(which(summ$cs>0))>0){
-g=max(summ$cs)
+g=unique(summ$cs[which(summ$cs>0)])
 S=list()
-for(i in 1:g){
+for(i in g){
 indi=which(summ$cs==i)
 a=summ$variable[indi]
 b=data.frame(Index=a,Variable=namW[summ$variable[indi]],CS=paste0("Int_CS",i))
