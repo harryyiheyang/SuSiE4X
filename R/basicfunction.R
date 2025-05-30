@@ -67,6 +67,7 @@ return(do.call(rbind,S))
 ###############################################################################
 Identifying_IntEffect=function(fitW,namW){
 summ=summary(fitW)$vars
+if(length(summ$cs)>0){
 g=max(summ$cs)
 S=list()
 for(i in 1:g){
@@ -76,4 +77,7 @@ b=data.frame(Index=a,Variable=namW[summ$variable[indi]],CS=paste0("Int_CS",i))
 S[[i]]=b
 }
 return(do.call(rbind,S))
+}else{
+return(NULL)
+}
 }
