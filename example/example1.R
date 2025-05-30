@@ -16,7 +16,7 @@ return(toeplitz(s))
 CScov=function(p,rho){
 diag(p)*(1-rho)+matrix(rho,p,p)
 }
-source("C:/Users/yxy1234/Downloads/SuSiE4X-main/example/otherfunction.R")
+source("example/otherfunction.R")
 n=1000
 p=10
 Main_TP=Main_TN=Int_TP=Int_TN=TIME=matrix(0,1000,3)
@@ -31,7 +31,7 @@ beta0=rep(0,p)
 ind=sample(p,3)
 ind=sort(ind)
 beta0[ind]=0.5
-eta=matrixVectorMultiply(Z,alpha0)+matrixVectorMultiply(X,beta0)+X[,ind[1]]*X[,ind[2]]+X[,ind[1]]*X[,ind[3]]
+eta=matrixVectorMultiply(Z,alpha0)+matrixVectorMultiply(X,beta0)#+X[,ind[1]]*X[,ind[2]]+X[,ind[1]]*X[,ind[3]]
 true_int_variable1=c(paste0("X",ind[1],"*X",ind[2]),paste0("X",ind[1],"*X",ind[3]))
 true_int_variable2=c(paste0("X",ind[1],"X",ind[2]),paste0("X",ind[1],"X",ind[3]))
 y=eta+rnorm(n,0,2)

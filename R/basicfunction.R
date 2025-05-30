@@ -67,7 +67,7 @@ return(do.call(rbind,S))
 ###############################################################################
 Identifying_IntEffect=function(fitW,namW){
 summ=summary(fitW)$vars
-if(length(summ$cs)>0){
+if(length(which(summ$cs>0))>0){
 g=max(summ$cs)
 S=list()
 for(i in 1:g){
