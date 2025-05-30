@@ -24,9 +24,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// blockwise_crossprod2
+arma::mat blockwise_crossprod2(const arma::mat& X, const arma::mat& Z, int n_threads, int block_size);
+RcppExport SEXP _SuSiE4X_blockwise_crossprod2(SEXP XSEXP, SEXP ZSEXP, SEXP n_threadsSEXP, SEXP block_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(blockwise_crossprod2(X, Z, n_threads, block_size));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_SuSiE4X_blockwise_crossprod", (DL_FUNC) &_SuSiE4X_blockwise_crossprod, 3},
+    {"_SuSiE4X_blockwise_crossprod2", (DL_FUNC) &_SuSiE4X_blockwise_crossprod2, 4},
     {NULL, NULL, 0}
 };
 

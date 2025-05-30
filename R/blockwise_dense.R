@@ -1,14 +1,16 @@
-#' Blockwise crossproduct for large dense matrices
+#' Blockwise crossproduct (X'X or X'Z)
 #'
-#' Computes X^T X by row blocks to reduce memory usage.
+#' Computes X'X or X'Z in memory-efficient blocks.
 #'
-#' @param X A numeric matrix.
-#' @param n_threads Number of threads for parallel computation (default = 1).
-#' @param block_size Number of rows per block (default = 10000).
-#'
-#' @return A p × p matrix equal to X^T X.
+#' @param X Numeric matrix.
+#' @param Z Optional second matrix. If provided, computes X'Z.
+#' @param n_threads Number of threads.
+#' @param block_size Block size for computation.
 #' @export
-blockwise_crossprod <- function(X, n_threads = 1L, block_size = 10000L) {
-  .Call('_SuSiE4X_blockwise_crossprod', PACKAGE = 'SuSiE4X', X, n_threads, block_size)
+blockwise_crossprod <- function(X, Z = NULL, n_threads = 1L, block_size = 10000L) {
+if (is.null(Z)) {
+return(.Call(`_SuSiE4X_blockwise_crossprod`, X, n_threads, block_size))
+} else {
+return(.Call(`_SuSiE4X_blockwise_crossprod2`, X, Z, n_threads, block_size))
 }
-
+}

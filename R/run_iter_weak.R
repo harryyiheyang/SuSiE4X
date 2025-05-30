@@ -4,11 +4,11 @@ n <- length(y)
 Xmean <- colMeans(X)
 
 if(is.null(crossprodX)){
-XtX <- blockwise_crossprod(X,n_threads) - n * tcrossprod(Xmean)
+XtX <- blockwise_crossprod(X,X,n_threads) - n * tcrossprod(Xmean)
 }else{
 XtX = crossprodX - n * tcrossprod(Xmean)
 }
-ZtZ <- blockwise_crossprod(Z,n_threads)
+ZtZ <- blockwise_crossprod(Z,Z,n_threads)
 etaX <- etaZ <- etaW <- 0
 fitX=NULL
 g=c()
@@ -37,23 +37,26 @@ etaX <- matrixVectorMultiply(X, beta)
 etaX <- etaX - mean(etaX)
 
 ## --- update etaW ---
-rW <- y - etaZ - etaX
-W <- matrixMultiply(X, t(as.matrix(fitX$alpha)))
-colnames(W) <- paste0("Main_CS", seq_len(ncol(W)))
+rW <- y- etaZ - etaX
+XCS <- matrixMultiply(X, t(as.matrix(fitX$alpha)))
+colnames(XCS) <- paste0("Main_CS", seq_len(ncol(XCS)))
 cs <- get_active_indices(fitX)
 if(length(cs)==0){
   stop("No credible set of marginal effects detected. SuSiE4X stops.")
 }
-W <- as.matrix(W[, cs, drop = FALSE])
-W <- get_pairwise_interactions(W, cbind(X,Z[, -1]))
-Wmean <- colMeans(W)
-WtW <- blockwise_crossprod(W,n_threads) - n * tcrossprod(Wmean)
+XCS <- as.matrix(XCS[, cs, drop = FALSE])
+G = cbind(Z,XCS)
+W <- get_pairwise_interactions(XCS, Z[, -1])
+GtG = blockwise_crossprod(G,G,n_threads)
+GtW = blockwise_crossprod(G,W,n_threads)
+ProjPart = matrixMultiply(G,(solve(GtG)%*%(GtW)))
+W= W - ProjPart
+WtW <- blockwise_crossprod(W,W,n_threads)
 Wty <- as.vector(crossprod(W, rW))
 yty4W <- var(rW) * n
 fitW <- susie_suff_stat(XtX = WtW, Xty = Wty, yty = yty4W, n = n, L = Linteraction, max_iter = susie.iter, estimate_prior_method = "EM")
 gamma <- coef.susie(fitW)[-1]
 etaW <- matrixVectorMultiply(W, gamma)
-etaW <- etaW - mean(etaW)
 
 ## --- check convergence ---
 errX <- sqrt(mean((beta - beta_prev)^2))

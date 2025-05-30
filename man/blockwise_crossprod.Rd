@@ -2,20 +2,19 @@
 % Please edit documentation in R/blockwise_dense.R
 \name{blockwise_crossprod}
 \alias{blockwise_crossprod}
-\title{Blockwise crossproduct for large dense matrices}
+\title{Blockwise crossproduct (X^T X or X^T Z)}
 \usage{
-blockwise_crossprod(X, n_threads = 1L, block_size = 10000L)
+blockwise_crossprod(X, Z = NULL, n_threads = 1L, block_size = 10000L)
 }
 \arguments{
-\item{X}{A numeric matrix.}
+\item{X}{Numeric matrix.}
 
-\item{n_threads}{Number of threads for parallel computation (default = 1).}
+\item{Z}{Optional second matrix. If provided, computes X'Z.}
 
-\item{block_size}{Number of rows per block (default = 10000).}
-}
-\value{
-A p × p matrix equal to X^T X.
+\item{n_threads}{Number of threads.}
+
+\item{block_size}{Block size for computation.}
 }
 \description{
-Computes X^T X by row blocks to reduce memory usage.
+Computes X'X or X'Z in memory-efficient blocks.
 }

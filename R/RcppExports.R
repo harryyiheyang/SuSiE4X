@@ -5,3 +5,7 @@ blockwise_crossprod <- function(X, n_threads = 1L, block_size = 10000L) {
     .Call(`_SuSiE4X_blockwise_crossprod`, X, n_threads, block_size)
 }
 
+blockwise_crossprod2 <- function(X, Z, n_threads = 1L, block_size = 10000L) {
+    .Call(`_SuSiE4X_blockwise_crossprod2`, X, Z, n_threads, block_size)
+}
+
