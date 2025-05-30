@@ -2,7 +2,7 @@
 % Please edit documentation in R/blockwise_dense.R
 \name{blockwise_crossprod}
 \alias{blockwise_crossprod}
-\title{Blockwise crossproduct (X^T X or X^T Z)}
+\title{Blockwise crossproduct (X'X or X'Z)}
 \usage{
 blockwise_crossprod(X, Z = NULL, n_threads = 1L, block_size = 10000L)
 }

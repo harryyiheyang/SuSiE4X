@@ -4,11 +4,11 @@ n <- length(y)
 Xmean <- colMeans(X)
 
 if(is.null(crossprodX)){
-XtX <- blockwise_crossprod(X,X,n_threads) - n * tcrossprod(Xmean)
+XtX <- blockwise_crossprod(X=X,n_threads=n_threads) - n * tcrossprod(Xmean)
 }else{
 XtX = crossprodX - n * tcrossprod(Xmean)
 }
-ZtZ <- blockwise_crossprod(Z,Z,n_threads)
+ZtZ <- blockwise_crossprod(X=Z,n_threads=n_threads)
 etaX <- etaZ <- etaW <- 0
 fitX=NULL
 g=c()
@@ -47,11 +47,11 @@ if(length(cs)==0){
 XCS <- as.matrix(XCS[, cs, drop = FALSE])
 G = cbind(Z,XCS)
 W <- get_pairwise_interactions(XCS, Z[, -1])
-GtG = blockwise_crossprod(G,G,n_threads)
+GtG = blockwise_crossprod(X=G,n_threads=n_threads)
 GtW = blockwise_crossprod(G,W,n_threads)
 ProjPart = matrixMultiply(G,(solve(GtG)%*%(GtW)))
 W= W - ProjPart
-WtW <- blockwise_crossprod(W,W,n_threads)
+WtW <- blockwise_crossprod(X=W,n_threads=n_threads)
 Wty <- as.vector(crossprod(W, rW))
 yty4W <- var(rW) * n
 fitW <- susie_suff_stat(XtX = WtW, Xty = Wty, yty = yty4W, n = n, L = Linteraction, max_iter = susie.iter, estimate_prior_method = "EM")
@@ -102,5 +102,6 @@ list(iter=iter,
    fitW = fitW,
    fitZ = fitZ,
    main_index=MainIndex,
-   interaction_index=IntIndex)
+   interaction_index=IntIndex,
+   nameW=colnames(W))
 }
