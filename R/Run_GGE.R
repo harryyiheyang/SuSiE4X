@@ -2,7 +2,9 @@ Run_GGE <- function(X, Z, y,crossprodX=NULL, Lmain, Linteraction, max.iter, min.
 
 n <- length(y)
 
-Z_Res=X_Res=etaX=etaZ=etaW=0
+Xmean=colMeans(X)
+etaX=etaZ=etaW=0
+meanY=mean(y)
 ZtZ = blockwise_crossprod(X=Z,n_threads=n_threads)
 if(is.null(crossprodX)){
 XtX = blockwise_crossprod(X=X,n_threads=n_threads)
@@ -15,7 +17,7 @@ g=c()
 beta=0
 alpha=0
 gamma=0
-Ymean=mean(y)
+meanY=mean(y)
 
 for (iter in 1:max.iter) {
 gamma_prev <- gamma
@@ -23,19 +25,23 @@ beta_prev <- beta
 alpha_prev <- alpha
 
 ## --- update etaZ ---
-rZ <- y - etaW - etaX
+rZ <- y - etaW - etaX - meanY
 Zty <- crossprod(Z, rZ)
 alpha <- as.vector(solve(ZtZ, Zty))
+etaZ = matrixVectorMultiply(Z,alpha)
 
 ## --- update etaX ---
-rX <- y - etaW - etaZ
+rX <- y - etaW - etaZ - meanY
 Xty <- as.vector(crossprod(X, rX))
 yty4X <- sum(rX^2)
-fitX <- susie_suff_stat(XtX = XtX, Xty = Xty, yty = yty4X, n = n, L = Lmain, max_iter = susie.iter, estimate_prior_method = "EM")
+fitX <- susie_suff_stat(XtX = XtX, Xty = Xty, yty = yty4X, n = n, L = Lmain,
+                        max_iter = susie.iter, estimate_prior_method = "EM",
+                        X_colmeans=Xmean,y_mean=mean(rX))
 beta <- coef.susie(fitX)[-1]
+etaX = matrixVectorMultiply(X,beta)+coef.susie(fitX)[1]
 
 ## --- update etaW ---
-rW <- y - etaX - etaZ
+rW <- y - etaX - etaZ - meanY
 XCS <- matrixMultiply(X, t(as.matrix(fitX$alpha)))
 colnames(XCS) <- paste0("Main_CS", seq_len(ncol(XCS)))
 cs <- sort(get_active_indices(fitX))
@@ -66,18 +72,20 @@ WCS=NULL
 if(is.null(WCS)){
 fit_final=lm(y~Z+XCS+WCS)
 coefs=coef(fit_final)
-alpha=coefs[1:(ncol(Z)+1)]
+meanY=coefs[1]
+alpha=coefs[2:(ncol(Z)+1)]
 XCSbeta=coefs[(ncol(Z)+2):(ncol(Z)+ncol(XCS)+1)]
 WCSbeta=coefs[-c(1:(ncol(Z)+ncol(XCS)+1))]
-etaZ=matrixVectorMultiply(cbind(1,Z),alpha)
+etaZ=matrixVectorMultiply(Z,alpha)
 etaX=matrixVectorMultiply(XCS,XCSbeta)
 etaW=matrixVectorMultiply(WCS,WCSbeta)
 }else{
 fit_final=lm(y~Z+XCS)
 coefs=coef(fit_final)
-alpha=coefs[1:(ncol(Z)+1)]
+meanY=coefs[1]
+alpha=coefs[2:(ncol(Z)+1)]
 XCSbeta=coefs[(ncol(Z)+2):(ncol(Z)+ncol(XCS)+1)]
-etaZ=matrixVectorMultiply(cbind(1,Z),alpha)
+etaZ=matrixVectorMultiply(Z,alpha)
 etaX=matrixVectorMultiply(XCS,XCSbeta)
 etaW=0
 }

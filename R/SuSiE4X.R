@@ -38,6 +38,7 @@
 #' @importFrom susieR susie_suff_stat coef.susie
 #' @importFrom CppMatrix matrixMultiply matrixVectorMultiply
 #' @importFrom graphics text
+#' @importFrom stats lm coef
 #'
 #' @export
 SuSiE4X <- function(X, Z=NULL, y, crossprodX=NULL,
@@ -55,7 +56,6 @@ if (is.null(colnames(Z))){
 nameZ <- paste0("Z", seq_len(ncol(Z)))
 }
 Z=demean(Z)
-X=demean(X)
 
 Run_GGE(X = X, Z = Z, y = y, crossprodX=crossprodX,
                 Lmain = Lmain, Linteraction = Linteraction,
