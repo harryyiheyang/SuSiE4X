@@ -19,9 +19,9 @@ diag(p)*(1-rho)+matrix(rho,p,p)
 source("example/otherfunction.R")
 n=1000
 p=10
-Main_TP=Main_TN=Int_TP=Int_TN=TIME=matrix(0,1000,3)
+Main_TP=Main_TN=Int_TP=Int_TN=TIME=matrix(0,100,3)
 
-for(iter in 1:1000){
+for(iter in 1:100){
 R=kronecker(CScov(5,0.3),ARcov(2,0.5))
 X=mvrnorm(n=n,mu=runif(p,0,1),R)
 Xmean=colMeans(X)
@@ -48,7 +48,7 @@ t2=Sys.time()
 t_RAMP=difftime(t2, t1, units = "secs")
 
 t1=Sys.time()
-fit_glinternet=glinternet.cv(X=cbind(X,Z),Y=y,numLevels=rep(1,ncol(X)+ncol(Z)),nLambda=50,numCores=10,verbose=F)
+fit_glinternet=glinternet.cv(X=cbind(X,Z),Y=y,numLevels=rep(1,ncol(X)+ncol(Z)),nLambda=50,numCores=4,verbose=F)
 t2=Sys.time()
 t_glinternet=difftime(t2, t1, units = "secs")
 
@@ -62,6 +62,6 @@ Main_TN[iter,]=c(tptn_SuSiE4X$tn_main,tptn_RAMP$tn_main,tptn_glinternet$tn_main)
 Int_TP[iter,]=c(tptn_SuSiE4X$tp_int,tptn_RAMP$tp_int,tptn_glinternet$tp_int)
 Int_TN[iter,]=c(tptn_SuSiE4X$tn_int,tptn_RAMP$tn_int,tptn_glinternet$tn_int)
 
-if(iter%%50==0) print(iter)
+if(iter%%10==0) print(iter)
 
 }

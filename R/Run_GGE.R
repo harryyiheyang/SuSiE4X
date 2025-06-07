@@ -44,7 +44,7 @@ if(length(cs)==0){
   stop("No credible set of marginal effects detected. SuSiE4X stops.")
 }
 XCS <- as.matrix(XCS[, cs, drop = FALSE])
-G = cbind(Z,XCS)
+G = cbind(1,Z,XCS)
 W <- get_pairwise_interactions(XCS, Z)
 GtG = blockwise_crossprod(X=G,n_threads=n_threads)
 GtW = blockwise_crossprod(X=G,Z=W,n_threads=n_threads)
