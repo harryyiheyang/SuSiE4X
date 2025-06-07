@@ -17,16 +17,17 @@ beta_prev <- beta
 alpha_prev <- alpha
 
 ## --- update etaZ ---
-rZ <- y - etaX - etaW - Ymean
-Z_Res=Z-Z_Res
+rZ <- y - etaW - etaX
+Z_Res=Z - Z_Res
+Z_Res=cbind(1,Z_Res)
 ZtZ = blockwise_crossprod(X=Z_Res,n_threads=n_threads)
 Zty <- crossprod(Z_Res, rZ)
 alpha <- as.vector(solve(ZtZ, Zty))
-etaZ <- matrixVectorMultiply(Z, alpha)
+etaZ <- matrixVectorMultiply(cbind(1,Z), alpha)
 
 ## --- update etaX ---
-rX <- y - etaW - etaZ - Ymean
-X_Res=X-X_Res
+rX <- y - etaW - etaZ
+X_Res= X - X_Res
 XtX = blockwise_crossprod(X=X_Res,n_threads=n_threads)
 Xty <- as.vector(crossprod(X_Res, rX))
 yty4X <- sum(rX^2)
@@ -36,7 +37,7 @@ etaX <- matrixVectorMultiply(X, beta)
 etaX = etaX - mean(etaX)
 
 ## --- update etaW ---
-rW <- y - etaX - etaZ - Ymean
+rW <- y - etaX - etaZ
 XCS <- matrixMultiply(X, t(as.matrix(fitX$alpha)))
 colnames(XCS) <- paste0("Main_CS", seq_len(ncol(XCS)))
 cs <- sort(get_active_indices(fitX))

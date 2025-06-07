@@ -24,8 +24,8 @@ etaX <- matrixVectorMultiply(X, beta)
 etaX = etaX - mean(etaX)
 
 ## --- update etaW ---
-rW <- y - etaX - meanY
-
+rW <- y - etaX
+rW = rW - mean(rW)
 XCS <- matrixMultiply(X, t(as.matrix(fitX$alpha)))
 colnames(XCS) <- paste0("Main_CS", seq_len(ncol(XCS)))
 cs <- sort(get_active_indices(fitX))
@@ -39,7 +39,8 @@ GtG = blockwise_crossprod(X=G,n_threads=n_threads)
 GtW = blockwise_crossprod(X=G,Z=W,n_threads=n_threads)
 ProjPart = matrixMultiply(G,(solve(GtG)%*%(GtW)))
 W_Res = W - ProjPart
-WtW <- blockwise_crossprod(X=W_Res,n_threads=n_threads)
+Wmean = colMeans(W_Res)
+WtW <- blockwise_crossprod(X=W_Res,n_threads=n_threads)-n*tcrossprod(Wmean)
 Wty <- as.vector(crossprod(W_Res, rW))
 yty4W <- var(rW) * n
 fitW <- susie_suff_stat(XtX = WtW, Xty = Wty, yty = yty4W, n = n, L = Linteraction, max_iter = susie.iter, estimate_prior_method = "EM")
