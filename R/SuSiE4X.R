@@ -34,11 +34,11 @@
 #' }
 #'
 #' @importFrom Matrix colMeans crossprod
-#' @importFrom stats var lm
+#' @importFrom stats var lm coef
 #' @importFrom susieR susie_suff_stat coef.susie
 #' @importFrom CppMatrix matrixMultiply matrixVectorMultiply
 #' @importFrom graphics text
-#' @importFrom stats lm coef
+
 #'
 #' @export
 SuSiE4X <- function(X, Z=NULL, y, crossprodX=NULL,
