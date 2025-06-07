@@ -1,8 +1,14 @@
-Run_GGE <- function(X, Z, y, Lmain, Linteraction, max.iter, min.iter, max.eps, susie.iter,verbose=T,n_threads=1,...) {
+Run_GGE <- function(X, Z, y,crossprodX=NULL, Lmain, Linteraction, max.iter, min.iter, max.eps, susie.iter,verbose=T,n_threads=1,...) {
 
 n <- length(y)
 
 Z_Res=X_Res=etaX=etaZ=etaW=0
+ZtZ = blockwise_crossprod(X=Z,n_threads=n_threads)
+if(is.null(crossprodX)){
+XtX = blockwise_crossprod(X=X,n_threads=n_threads)
+}else{
+XtX=crossprodX
+}
 
 fitX=NULL
 g=c()
@@ -18,23 +24,15 @@ alpha_prev <- alpha
 
 ## --- update etaZ ---
 rZ <- y - etaW - etaX
-Z_Res=Z - Z_Res
-Z_Res=cbind(1,Z_Res)
-ZtZ = blockwise_crossprod(X=Z_Res,n_threads=n_threads)
-Zty <- crossprod(Z_Res, rZ)
+Zty <- crossprod(Z, rZ)
 alpha <- as.vector(solve(ZtZ, Zty))
-etaZ <- matrixVectorMultiply(cbind(1,Z), alpha)
 
 ## --- update etaX ---
 rX <- y - etaW - etaZ
-X_Res= X - X_Res
-XtX = blockwise_crossprod(X=X_Res,n_threads=n_threads)
-Xty <- as.vector(crossprod(X_Res, rX))
+Xty <- as.vector(crossprod(X, rX))
 yty4X <- sum(rX^2)
 fitX <- susie_suff_stat(XtX = XtX, Xty = Xty, yty = yty4X, n = n, L = Lmain, max_iter = susie.iter, estimate_prior_method = "EM")
 beta <- coef.susie(fitX)[-1]
-etaX <- matrixVectorMultiply(X, beta)
-etaX = etaX - mean(etaX)
 
 ## --- update etaW ---
 rW <- y - etaX - etaZ
@@ -55,19 +53,33 @@ WtW <- blockwise_crossprod(X=W_Res,n_threads=n_threads)
 Wty <- as.vector(crossprod(W_Res, rW))
 yty4W <- sum(rW^2)
 fitW <- susie_suff_stat(XtX = WtW, Xty = Wty, yty = yty4W, n = n, L = Linteraction, max_iter = susie.iter, estimate_prior_method = "EM")
-gamma <- coef.susie(fitW)[-1]
-etaW <- matrixVectorMultiply(W, gamma)
-etaW = etaW - mean(etaW)
 
 ## Update WCS
 cs_W <- sort(get_active_indices(fitW))
 if(length(cs)>0){
 WCS <- matrixMultiply(W, t(as.matrix(fitW$alpha)))
 WCS <- as.matrix(WCS[, cs_W, drop = FALSE])
-Z_Res = ProjectRes(A=Z,B=WCS,inercept=T,n_threads=n_threads)
-X_Res = ProjectRes(A=X,B=WCS,inercept=T,n_threads=n_threads)
 }else{
-Z_Res=X_Res=0
+WCS=NULL
+}
+
+if(is.null(WCS)){
+fit_final=lm(y~Z+XCS+WCS)
+coefs=coef(fit_final)
+alpha=coefs[1:(ncol(Z)+1)]
+XCSbeta=coefs[(ncol(Z)+2):(ncol(Z)+ncol(XCS)+1)]
+WCSbeta=coefs[-c(1:(ncol(Z)+ncol(XCS)+1))]
+etaZ=matrixVectorMultiply(cbind(1,Z),alpha)
+etaX=matrixVectorMultiply(XCS,XCSbeta)
+etaW=matrixVectorMultiply(WCS,WCSbeta)
+}else{
+fit_final=lm(y~Z+XCS)
+coefs=coef(fit_final)
+alpha=coefs[1:(ncol(Z)+1)]
+XCSbeta=coefs[(ncol(Z)+2):(ncol(Z)+ncol(XCS)+1)]
+etaZ=matrixVectorMultiply(cbind(1,Z),alpha)
+etaX=matrixVectorMultiply(XCS,XCSbeta)
+etaW=0
 }
 
 ## --- check convergence ---

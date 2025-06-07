@@ -8,6 +8,7 @@ SuSiE4X(
   X,
   Z = NULL,
   y,
+  crossprodX = NULL,
   n_threads = 1,
   Lmain = 5,
   Linteraction = 5,

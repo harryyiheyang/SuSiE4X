@@ -40,7 +40,7 @@
 #' @importFrom graphics text
 #'
 #' @export
-SuSiE4X <- function(X, Z=NULL, y,
+SuSiE4X <- function(X, Z=NULL, y, crossprodX=NULL,
                     n_threads = 1, Lmain = 5, Linteraction = 5,
                     max.iter = 15, max.eps = 1e-5, min.iter = 3,
                     susie.iter = 300, verbose = TRUE,...) {
@@ -55,8 +55,9 @@ if (is.null(colnames(Z))){
 nameZ <- paste0("Z", seq_len(ncol(Z)))
 }
 Z=demean(Z)
+X=demean(X)
 
-Run_GGE(X = X, Z = Z, y = y,
+Run_GGE(X = X, Z = Z, y = y, crossprodX=crossprodX,
                 Lmain = Lmain, Linteraction = Linteraction,
                 max.iter = max.iter, max.eps = max.eps, min.iter = min.iter,
                 susie.iter = susie.iter, verbose = verbose,n_threads=n_threads,...)
