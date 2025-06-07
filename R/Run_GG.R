@@ -61,7 +61,7 @@ if(length(cs)>0){
 errX <- sqrt(mean((beta - beta_prev)^2))
 g[iter]=errX
 if (verbose == TRUE){
-  cat(paste0("iteration ",iter,"\n"))
+  cat(paste0("Iteration ",iter,"\n"))
 }
 if (errX < max.eps&iter>min.iter) {
   break

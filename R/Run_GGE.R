@@ -75,7 +75,7 @@ errZ <- sqrt(mean((alpha - alpha_prev)^2))
 err = c(errX, errZ)
 g[iter]=max(err)
 if (verbose == TRUE){
-cat(paste0("iteration ",iter,"\n"))
+cat(paste0("Iteration ",iter,"\n"))
 }
 if (max(err) < max.eps&iter>min.iter) {
   break
