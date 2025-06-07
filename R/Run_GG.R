@@ -112,6 +112,7 @@ Run_GG <- function(X, y,crossprodX=NULL, Lmain, Linteraction, max.iter, min.iter
        error=g,
        fitX = fitX,
        fitW = fitW,
+       fitJoint = fit_final,
        main_index=MainIndex,
        interaction_index=IntIndex,
        nameW=colnames(W))

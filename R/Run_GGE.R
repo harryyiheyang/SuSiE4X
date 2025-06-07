@@ -38,7 +38,7 @@ fitX <- susie_suff_stat(XtX = XtX, Xty = Xty, yty = yty4X, n = n, L = Lmain,
                         max_iter = susie.iter, estimate_prior_method = "EM",
                         X_colmeans=Xmean,y_mean=mean(rX))
 beta <- coef.susie(fitX)[-1]
-etaX = matrixVectorMultiply(X,beta)+coef.susie(fitX)[1]
+etaX = matrixVectorMultiply(X,beta)#+coef.susie(fitX)[1]
 
 ## --- update etaW ---
 rW <- y - etaX - etaZ - meanY
@@ -133,6 +133,7 @@ list(iter=iter,
    fitX = fitX,
    fitW = fitW,
    fitZ = fitZ,
+   fitJoint = fit_final,
    main_index=MainIndex,
    interaction_index=IntIndex,
    nameW=colnames(W))

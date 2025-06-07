@@ -53,6 +53,7 @@ A list containing results from the iterative SuSiE fitting procedure:
   \item{fitX}{SuSiE result for main effects.}
   \item{fitW}{SuSiE result for interaction terms.}
   \item{fitZ}{Final linear model of y ~ Z with offset.}
+  \item{fitJoint}{Final linear model of y ~ Z + credible sets of direct and interaction effects.}
 }
 }
 \description{
