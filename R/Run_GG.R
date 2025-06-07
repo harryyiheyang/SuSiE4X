@@ -58,7 +58,7 @@ Run_GG <- function(X, y,crossprodX=NULL, Lmain, Linteraction, max.iter, min.iter
       WCS=NULL
     }
 
-    if(is.null(WCS)){
+    if(is.null(WCS)==F){
       fit_final=lm(y~XCS+WCS)
       coefs=coef(fit_final)
       meanY=coefs[1]

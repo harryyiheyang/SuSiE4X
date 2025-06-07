@@ -69,7 +69,7 @@ WCS <- as.matrix(WCS[, cs_W, drop = FALSE])
 WCS=NULL
 }
 
-if(is.null(WCS)){
+if(is.null(WCS)==F){
 fit_final=lm(y~Z+XCS+WCS)
 coefs=coef(fit_final)
 meanY=coefs[1]
