@@ -324,7 +324,7 @@ family
 
 mgcv_model_name <- function(mgcv_model = NULL, n) {
 if (is.null(mgcv_model)) {
-return(if (n < 50000L) "gam" else "bam")
+return("gam")
 } else {
 if (!is.character(mgcv_model) || length(mgcv_model) != 1L || is.na(mgcv_model)) {
 stop("mgcv_model must be NULL, 'gam', or 'bam'.")
