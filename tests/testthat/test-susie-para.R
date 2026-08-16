@@ -383,6 +383,7 @@ test_that("Cox and OCAT diagnostics retain the pre-ridge cross-product", {
 
   cox_ss <- cox_suffstat_block(
     X, rep(0, 60), Z, rexp(60), rbinom(60, 1, 0.7),
+    nuisance_precision = numeric(0),
     n_threads = 1, ridge = ridge
   )
   expect_equal(diag(cox_ss$XtX) - diag(cox_ss$XtX_pre_ridge),

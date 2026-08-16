@@ -257,13 +257,15 @@ estimate_prior_variance <- function(X, y, Z, PRS, SNPInfo,
       ZI <- cbind(Intercept = 1, Q_loco)
       ss <- weighted_projected_suffstats(
         X = X_block, y = work_y, ZI = ZI,
-        weights = weights, n_threads = n_threads,
+        weights = weights, nuisance_precision = numeric(0),
+        n_threads = n_threads,
         block_size = suff_block_size
       )
     } else if (identical(path, "cox")) {
       ss <- cox_suffstat_block(
         Xblk = X_block, eta = eta, Znui = Q_loco,
         surv_time = as.numeric(y), surv_status = status,
+        nuisance_precision = numeric(0),
         n_threads = n_threads, block_size = suff_block_size
       )
       ss$yty <- n - 1

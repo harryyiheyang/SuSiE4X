@@ -39,6 +39,9 @@ Run_GGE_Select_GLM <- function(X, Z, y, family = binomial(link = "logit"), mgcv_
     ZCS_refit <- NULL
     XCS_refit <- NULL
     WCS_refit <- NULL
+    fitZ <- NULL
+    fitX <- NULL
+    fitW <- NULL
     fitX_no_cs_streak <- 0L
     for (iter in 1:max.iter) {
         beta_prev <- beta
@@ -49,7 +52,8 @@ Run_GGE_Select_GLM <- function(X, Z, y, family = binomial(link = "logit"), mgcv_
         pseudo_response <- work$pseudo_response
         W_diag <- work$weights
         ZI_env <- cbind(Intercept = rep(1, n), XCS_refit, WCS_refit)
-        ssZ <- weighted_projected_suffstats(X = Z, y = pseudo_response, ZI = ZI_env, weights = W_diag, n_threads = n_threads,
+        ssZ <- weighted_projected_suffstats(X = Z, y = pseudo_response, ZI = ZI_env, weights = W_diag,
+            nuisance_precision = projection_penalty_precision(ZI_env, fitX, fitW, fitZ), n_threads = n_threads,
             block_size = suff_block_size)
         ZtZ_w <- ssZ$XtX
         Zty_w <- ssZ$Xty
@@ -64,7 +68,8 @@ Run_GGE_Select_GLM <- function(X, Z, y, family = binomial(link = "logit"), mgcv_
         ZCS <- env_terms$ZCS
         ZCS_refit <- env_terms$ZCS_refit
         ZI_main <- cbind(Intercept = 1, ZCS_refit, WCS_refit)
-        ssX <- weighted_projected_suffstats(X = X, y = pseudo_response, ZI = ZI_main, weights = W_diag, n_threads = n_threads,
+        ssX <- weighted_projected_suffstats(X = X, y = pseudo_response, ZI = ZI_main, weights = W_diag,
+            nuisance_precision = projection_penalty_precision(ZI_main, fitX, fitW, fitZ), n_threads = n_threads,
             block_size = suff_block_size)
         XtX <- {
             ssX$XtX
@@ -116,7 +121,9 @@ Run_GGE_Select_GLM <- function(X, Z, y, family = binomial(link = "logit"), mgcv_
         }
         else {
             ZI_int <- cbind(Intercept = 1, ZCS_refit, XCS_refit)
-            ssW <- weighted_projected_suffstats(W, pseudo_response, ZI_int, W_diag, n_threads = n_threads, block_size = suff_block_size)
+            ssW <- weighted_projected_suffstats(W, pseudo_response, ZI_int, W_diag,
+              nuisance_precision = projection_penalty_precision(ZI_int, fitX, fitW, fitZ),
+              n_threads = n_threads, block_size = suff_block_size)
             WtW <- ssW$XtX
             Wty <- ssW$Xty
             yty4W <- ssW$yty

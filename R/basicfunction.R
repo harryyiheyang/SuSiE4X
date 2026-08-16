@@ -765,11 +765,16 @@ Z_index
 }
 
 weighted_projected_suffstats <- function(X, y, ZI, weights,
+                                         nuisance_precision,
                                          n_threads = 1,
                                          ridge = 1e-8,
                                          block_size = 10000L) {
+if (missing(nuisance_precision)) {
+stop("nuisance_precision must be supplied explicitly for every projection.")
+}
 if (!is.null(ZI)) ZI <- as.matrix(ZI)
 q <- if (is.null(ZI)) 0L else ncol(ZI)
+projection_precision <- align_projection_precision(ZI, nuisance_precision)
 block_size <- max(1L, as.integer(block_size))
 
 y <- as.numeric(y)
@@ -789,6 +794,7 @@ yty_raw <- yty
 if (q > 0L) {
 Zw <- ZI * weights
 ZtZ <- matrixMultiply(ZI, Zw, transA = TRUE)
+diag(ZtZ) <- diag(ZtZ) + projection_precision
 ZtX <- matrixMultiply(Zw, X, transA = TRUE)
 Zty <- as.numeric(matrixMultiply(ZI, matrix(wy, ncol = 1), transA = TRUE))
 rm(Zw)

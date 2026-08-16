@@ -73,7 +73,8 @@ Run_GG_OCAT <- function(X, y, family = NULL, mgcv_model = NULL, Lmain, Lint, max
         colnames(ZI_main) <- "Intercept"
         if (!is.null(WCS_refit))
             ZI_main <- cbind(ZI_main, WCS_refit)
-        ssX <- weighted_projected_suffstats(X = X, y = pseudo_response, ZI = ZI_main, weights = W_diag, n_threads = n_threads,
+        ssX <- weighted_projected_suffstats(X = X, y = pseudo_response, ZI = ZI_main, weights = W_diag,
+            nuisance_precision = projection_penalty_precision(ZI_main, fitX, fitW), n_threads = n_threads,
             block_size = suff_block_size)
         XtX <- {
             ssX$XtX
@@ -117,7 +118,9 @@ Run_GG_OCAT <- function(X, y, family = NULL, mgcv_model = NULL, Lmain, Lint, max
             }
             else {
                 ZI_int <- cbind(Intercept = 1, XCS_refit)
-                ssW <- weighted_projected_suffstats(W, pseudo_response, ZI_int, W_diag, n_threads = n_threads, block_size = suff_block_size)
+                ssW <- weighted_projected_suffstats(W, pseudo_response, ZI_int, W_diag,
+                  nuisance_precision = projection_penalty_precision(ZI_int, fitX, fitW),
+                  n_threads = n_threads, block_size = suff_block_size)
                 WtW <- ssW$XtX
                 Wty <- ssW$Xty
                 yty4W <- ssW$yty

@@ -67,8 +67,9 @@ Run_GGE_ZIP <- function(X, Z, y,
 
 
     ZI_main <- zip_nuisance_design(n, Zmodel, WCS_refit)
-    ssX <- weighted_residual_suffstats(
-      X = X, z = work$z, ZI = ZI_main, weights = work$weights,
+    ssX <- weighted_projected_suffstats(
+      X = X, y = work$z, ZI = ZI_main, weights = work$weights,
+      nuisance_precision = projection_penalty_precision(ZI_main, fitX, fitW),
       n_threads = n_threads, ridge = ridge, block_size = suff_block_size
     )
     fitX <- .fit_susie_stage(
@@ -130,8 +131,9 @@ Run_GGE_ZIP <- function(X, Z, y,
         WCS_refit <- NULL
       } else {
       ZI_int <- zip_nuisance_design(n, Zmodel, XCS_refit)
-      ssW <- weighted_residual_suffstats(
-        X = W, z = work$z, ZI = ZI_int, weights = work$weights,
+      ssW <- weighted_projected_suffstats(
+        X = W, y = work$z, ZI = ZI_int, weights = work$weights,
+        nuisance_precision = projection_penalty_precision(ZI_int, fitX, fitW),
         n_threads = n_threads, ridge = ridge, block_size = suff_block_size
       )
       fitW <- .fit_susie_stage(

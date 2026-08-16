@@ -67,6 +67,68 @@ term_names, perl = TRUE
 )]
 }
 
+projection_penalty_precision <- function(ZI, fitX = NULL, fitW = NULL,
+                                         fitZ = NULL) {
+if (is.null(ZI)) return(stats::setNames(numeric(0), character(0)))
+term_names <- refit_penalty_terms(colnames(as.matrix(ZI)))
+if (!length(term_names)) {
+return(stats::setNames(numeric(0), character(0)))
+}
+penalty_V <- refit_penalty_variance(
+fitX, fitW, term_names, fitZ = fitZ
+)
+stats::setNames(1 / as.numeric(penalty_V), names(penalty_V))
+}
+
+align_projection_precision <- function(ZI, nuisance_precision) {
+q <- if (is.null(ZI)) 0L else ncol(as.matrix(ZI))
+if (!q) return(numeric(0))
+
+term_names <- colnames(as.matrix(ZI))
+if (is.null(term_names)) {
+if (length(nuisance_precision)) {
+stop("A penalized nuisance projection design must have column names.")
+}
+return(numeric(q))
+}
+required <- refit_penalty_terms(term_names)
+precision_names <- names(nuisance_precision)
+if ((any(!nzchar(term_names)) || anyDuplicated(term_names)) &&
+    (length(nuisance_precision) || length(required))) {
+stop("A penalized nuisance projection design must have unique non-empty column names.")
+}
+if (length(nuisance_precision)) {
+if (is.null(precision_names) || any(!nzchar(precision_names)) ||
+    anyDuplicated(precision_names)) {
+stop("nuisance_precision must be a uniquely named vector.")
+}
+if (any(!is.finite(nuisance_precision) | nuisance_precision <= 0)) {
+stop("nuisance_precision must contain positive finite values.")
+}
+unknown <- setdiff(precision_names, term_names)
+if (length(unknown)) {
+stop("nuisance_precision names are absent from the projection design: ",
+     paste(unknown, collapse = ", "), ".")
+}
+if (any(precision_names %in% c("Intercept", "(Intercept)"))) {
+stop("The projection intercept cannot be penalized.")
+}
+}
+missing_required <- setdiff(required, precision_names)
+if (length(missing_required)) {
+stop(
+"Every penalized refit nuisance term requires projection precision: ",
+paste(missing_required, collapse = ", "), "."
+)
+}
+
+out <- stats::setNames(numeric(q), term_names)
+if (length(nuisance_precision)) {
+out[precision_names] <- as.numeric(nuisance_precision)
+}
+out
+}
+
 mgcv_refit_dispersion <- function(fit) {
 phi <- as.numeric(fit$sig2)[1L]
 if (!length(phi) || !is.finite(phi) || phi <= 0) {

@@ -62,17 +62,6 @@ zip_nuisance_design <- function(n, ...) {
   out
 }
 
-weighted_residual_suffstats <- function(X, z, ZI, weights,
-                                        n_threads = 1,
-                                        ridge = 1e-8,
-                                        block_size = 10000L) {
-  weighted_projected_suffstats(
-    X = X, y = z, ZI = ZI, weights = weights,
-    n_threads = n_threads, ridge = ridge,
-    block_size = block_size
-  )
-}
-
 zip_extract_working <- function(fit, y, eta_clip_range = c(-50, 50)) {
   gamma <- as.numeric(fit$linear.predictors)
   gamma <- pmin(pmax(gamma, eta_clip_range[1]), eta_clip_range[2])

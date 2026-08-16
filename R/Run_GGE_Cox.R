@@ -57,7 +57,8 @@ eta <- fit_final$linear.predictors
 eta <- pmin(pmax(eta, eta_clip_range[1]), eta_clip_range[2])
 
 ssX <- cox_suffstat_block(X, eta, cbind(Z, WCS_refit), y, status,
-                           n_threads = n_threads, ridge = ridge,
+                          nuisance_precision = projection_penalty_precision(cbind(Z, WCS_refit), fitX, fitW),
+                          n_threads = n_threads, ridge = ridge,
                            block_size = suff_block_size)
 fitX <- .fit_susie_stage(
 structural = list(XtX = ssX$XtX, Xty = ssX$Xty, yty = n - 1, n = n, L = Lmain),
@@ -113,7 +114,8 @@ W <- NULL
 fitW <- NULL
 } else {
 ssW <- cox_suffstat_block(W, eta, cbind(Z, XCS_refit), y, status,
-                           n_threads = n_threads, ridge = ridge,
+                          nuisance_precision = projection_penalty_precision(cbind(Z, XCS_refit), fitX, fitW),
+                          n_threads = n_threads, ridge = ridge,
                            block_size = suff_block_size)
 fitW <- .fit_susie_stage(
 structural = list(XtX = ssW$XtX, Xty = ssW$Xty, yty = n - 1, n = n, L = Lint),

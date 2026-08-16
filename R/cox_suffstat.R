@@ -9,8 +9,12 @@
 #' @keywords internal
 #' @noRd
 cox_suffstat_block <- function(Xblk, eta, Znui, surv_time, surv_status,
+                               nuisance_precision,
                                n_threads = 1, ridge = 1e-6,
                                block_size = 10000L) {
+  if (missing(nuisance_precision)) {
+    stop("nuisance_precision must be supplied explicitly for every projection.")
+  }
   Xblk <- as.matrix(Xblk)
   n <- nrow(Xblk)
   p <- ncol(Xblk)
@@ -23,6 +27,7 @@ cox_suffstat_block <- function(Xblk, eta, Znui, surv_time, surv_status,
     ZI <- cbind(Intercept = 1, Znui)
   }
   q <- ncol(ZI)
+  projection_precision <- align_projection_precision(ZI, nuisance_precision)
 
   XZE <- cbind(Xblk, eta, ZI)
 
@@ -49,17 +54,23 @@ cox_suffstat_block <- function(Xblk, eta, Znui, surv_time, surv_status,
   XtE <- XZEtXZE[idxX, idxE, drop = FALSE]
   XtZ <- XZEtXZE[idxX, idxZ, drop = FALSE]
   ZtZ <- XZEtXZE[idxZ, idxZ, drop = FALSE]
+  diag(ZtZ) <- diag(ZtZ) + projection_precision
   ZtX <- XZEtXZE[idxZ, idxX, drop = FALSE]
   ZtE <- XZEtXZE[idxZ, idxE, drop = FALSE]
   XtM <- XZEty[idxX]
+  ZtM <- XZEty[idxZ]
 
   Zinv_ZtX <- solve_with_ridge(ZtZ, ZtX, ridge = ridge)
-  Zinv_ZtE <- solve_with_ridge(ZtZ, ZtE, ridge = ridge)
+  Zinv_ZtE_score <- solve_with_ridge(
+    ZtZ, matrix(ZtE + ZtM, ncol = 1L), ridge = ridge
+  )
 
   XtX_proj <- XtX - matrixMultiply(XtZ, Zinv_ZtX)
-  XtE_proj <- as.vector(XtE - matrixVectorMultiply(XtZ, Zinv_ZtE))
+  XtE_proj <- as.vector(
+    XtE + XtM - matrixVectorMultiply(XtZ, Zinv_ZtE_score)
+  )
 
-  Xty <- XtE_proj + XtM
+  Xty <- XtE_proj
   XtX <- (XtX_proj + t(XtX_proj)) / 2
   XtX_pre_ridge <- XtX
   diag(XtX) <- diag(XtX) + ridge

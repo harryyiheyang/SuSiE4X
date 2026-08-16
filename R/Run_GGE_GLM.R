@@ -59,7 +59,8 @@ Run_GGE_GLM <- function(X, Z, y, family = binomial(link = "logit"), mgcv_model =
         pseudo_response <- work$pseudo_response
         W_diag <- work$weights
         ZI_main <- cbind(Intercept = 1, Z, WCS_refit)
-        ssX <- weighted_projected_suffstats(X = X, y = pseudo_response, ZI = ZI_main, weights = W_diag, n_threads = n_threads,
+        ssX <- weighted_projected_suffstats(X = X, y = pseudo_response, ZI = ZI_main, weights = W_diag,
+            nuisance_precision = projection_penalty_precision(ZI_main, fitX, fitW), n_threads = n_threads,
             block_size = suff_block_size)
         XtX <- {
             ssX$XtX
@@ -107,7 +108,9 @@ Run_GGE_GLM <- function(X, Z, y, family = binomial(link = "logit"), mgcv_model =
         }
         else {
             ZI_int <- cbind(Intercept = 1, Z, XCS_refit)
-            ssW <- weighted_projected_suffstats(W, pseudo_response, ZI_int, W_diag, n_threads = n_threads, block_size = suff_block_size)
+            ssW <- weighted_projected_suffstats(W, pseudo_response, ZI_int, W_diag,
+              nuisance_precision = projection_penalty_precision(ZI_int, fitX, fitW),
+              n_threads = n_threads, block_size = suff_block_size)
             WtW <- ssW$XtX
             Wty <- ssW$Xty
             yty4W <- ssW$yty

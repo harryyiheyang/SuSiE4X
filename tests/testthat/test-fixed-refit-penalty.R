@@ -144,6 +144,89 @@ test_that("environment CS terms map to fitZ while raw Z stays unpenalized", {
   expect_false("Z1" %in% names(out))
 })
 
+test_that("weighted Schur projection includes every nuisance precision", {
+  set.seed(730)
+  n <- 40L
+  c1 <- rnorm(n)
+  c2 <- rnorm(n)
+  X <- cbind(x1 = 0.75 * c1 + rnorm(n, sd = 0.5),
+             x2 = -0.5 * c2 + rnorm(n, sd = 0.7))
+  C <- cbind(Intercept = 1, Main_CS1 = c1, Int_CS1 = c2)
+  weights <- runif(n, 0.3, 1.7)
+  y <- 0.8 * c1 - 0.4 * c2 + 0.6 * X[, 1L] + rnorm(n)
+  precision <- c(Main_CS1 = 2, Int_CS1 = 4)
+
+  ss <- SuSiE4I:::weighted_projected_suffstats(
+    X, y, C, weights, nuisance_precision = precision, ridge = 0
+  )
+  Hcc <- crossprod(C, weights * C) + diag(c(0, precision), 3L)
+  Hcx <- crossprod(C, weights * X)
+  hc <- as.numeric(crossprod(C, weights * y))
+  expected_XtX <- crossprod(X, weights * X) - t(Hcx) %*% solve(Hcc, Hcx)
+  expected_Xty <- as.numeric(crossprod(X, weights * y) -
+    t(Hcx) %*% solve(Hcc, hc))
+  expected_yty <- sum(weights * y^2) - as.numeric(crossprod(hc, solve(Hcc, hc)))
+
+  expect_equal(ss$XtX, expected_XtX, tolerance = 1e-10)
+  expect_equal(unname(ss$Xty), expected_Xty, tolerance = 1e-10)
+  expect_equal(ss$yty, expected_yty, tolerance = 1e-10)
+  expect_error(
+    SuSiE4I:::weighted_projected_suffstats(
+      X, y, C, weights, nuisance_precision = numeric(0)
+    ),
+    "requires projection precision"
+  )
+})
+
+test_that("Cox Schur projection includes nuisance precision and score", {
+  set.seed(731)
+  n <- 45L
+  c1 <- rnorm(n)
+  c2 <- rnorm(n)
+  X <- cbind(x1 = 0.7 * c1 + rnorm(n, sd = 0.6),
+             x2 = -0.4 * c2 + rnorm(n, sd = 0.8))
+  C <- cbind(Main_CS1 = c1, Int_CS1 = c2)
+  eta <- 0.35 * c1 - 0.25 * c2
+  time <- rexp(n, exp(eta))
+  status <- as.integer(seq_len(n) %% 4L != 0L)
+  precision <- c(Main_CS1 = 2, Int_CS1 = 4)
+  ridge <- 1e-8
+
+  ss <- SuSiE4I:::cox_suffstat_block(
+    X, eta, C, time, status, nuisance_precision = precision,
+    ridge = ridge
+  )
+
+  ZI <- cbind(Intercept = 1, C)
+  XZE <- cbind(X, eta, ZI)
+  raw <- SuSiE4I:::cox_suffstat(XZE, eta, time, status)
+  H <- crossprod(XZE * sqrt(as.numeric(raw$a))) - crossprod(raw$B)
+  H <- (H + t(H)) / 2
+  score <- as.numeric(raw$Xty)
+  idxX <- seq_len(ncol(X))
+  idxE <- ncol(X) + 1L
+  idxC <- idxE + seq_len(ncol(ZI))
+  Hcc <- H[idxC, idxC, drop = FALSE] +
+    diag(c(0, precision), ncol(ZI)) + diag(ridge, ncol(ZI))
+  expected_XtX <- H[idxX, idxX, drop = FALSE] -
+    H[idxX, idxC, drop = FALSE] %*%
+      solve(Hcc, H[idxC, idxX, drop = FALSE])
+  expected_Xty <- as.numeric(
+    H[idxX, idxE] + score[idxX] -
+      H[idxX, idxC, drop = FALSE] %*%
+        solve(Hcc, H[idxC, idxE] + score[idxC])
+  )
+
+  expect_equal(ss$XtX_pre_ridge, unname(expected_XtX), tolerance = 1e-9)
+  expect_equal(ss$Xty, expected_Xty, tolerance = 1e-9)
+  expect_error(
+    SuSiE4I:::cox_suffstat_block(
+      X, eta, C, time, status, nuisance_precision = numeric(0)
+    ),
+    "requires projection precision"
+  )
+})
+
 test_that("ordinal logit refit uses mgcv ocat with fixed V", {
   set.seed(20260720)
   n <- 180L

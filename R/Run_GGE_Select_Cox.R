@@ -51,6 +51,7 @@ Run_GGE_Select_Cox <- function(X, Z, y, status,
 
     ## ==================== environment stage ====================
     ssZ <- cox_suffstat_block(Z, eta, cbind(XCS_refit, WCS_refit), y, status,
+                              nuisance_precision = projection_penalty_precision(cbind(XCS_refit, WCS_refit), fitX, fitW, fitZ),
                               n_threads = n_threads, ridge = ridge,
                               block_size = suff_block_size)
     fitZ <- .fit_susie_stage(
@@ -73,6 +74,7 @@ Run_GGE_Select_Cox <- function(X, Z, y, status,
 
     ## ==================== main-effect stage ====================
     ssX <- cox_suffstat_block(X, eta, cbind(ZCS_refit, WCS_refit), y, status,
+                              nuisance_precision = projection_penalty_precision(cbind(ZCS_refit, WCS_refit), fitX, fitW, fitZ),
                               n_threads = n_threads, ridge = ridge,
                               block_size = suff_block_size)
     fitX <- .fit_susie_stage(
@@ -126,6 +128,7 @@ Run_GGE_Select_Cox <- function(X, Z, y, status,
       WCS_refit <- NULL
     } else {
     ssW <- cox_suffstat_block(W, eta, cbind(ZCS_refit, XCS_refit), y, status,
+                              nuisance_precision = projection_penalty_precision(cbind(ZCS_refit, XCS_refit), fitX, fitW, fitZ),
                               n_threads = n_threads, ridge = ridge,
                               block_size = suff_block_size)
     fitW <- .fit_susie_stage(
